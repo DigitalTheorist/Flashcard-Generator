@@ -1,12 +1,10 @@
 
 var fs = require('fs');
 
-var ClozeCard = function (fullText, partial, cloze) {
+var ClozeCard = function (front, cloze) {
 
-  this.fullText = fullText
-  this.partial = partial
   this.cloze = cloze
-
+  this.front = front
 };
 
 
