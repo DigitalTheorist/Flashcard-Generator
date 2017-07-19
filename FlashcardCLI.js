@@ -1,7 +1,6 @@
 
 var inquirer = require('inquirer');
 var fs = require('fs');
-var lineReader = require('line-reader');
 
 var MakeCard = require("./BasicCard");
 var ClozeCard = require("./ClozeCard");
@@ -62,8 +61,8 @@ inquirer.prompt ([
 
       console.log("Your Card has been created and added to the list.")
 
-      fs.appendFileSync("questions.txt",logBasicCardQuestion + "\n", encoding = 'utf8');
-      fs.appendFileSync("answers.txt",logBasicCardAnswer + "\n", encoding = 'utf8');
+      fs.appendFileSync("questions.txt",'\n' + logBasicCardQuestion, encoding = 'utf8');
+      fs.appendFileSync("answers.txt",'\n' + logBasicCardAnswer, encoding = 'utf8');
 
       startProgram();
     });
@@ -90,23 +89,27 @@ inquirer.prompt ([
       var clozeCard = new ClozeCard (answers.front, answers.cloze)
 
       var logClozeCardQuestion = answers.front;
-      var logClozeCardAnswer =  answers.cloze;
+      var logClozeCardAnswer = answers.cloze;
 
       console.log("Your Card has been created and added to the list.")
 
-      fs.appendFileSync("questions.txt",logClozeCardQuestion, encoding = 'utf8');
-      fs.appendFileSync("answers.txt",logClozeCardAnswer, encoding = 'utf8');
+      fs.appendFileSync("questions.txt",'\n' + logClozeCardQuestion, encoding = 'utf8');
+      fs.appendFileSync("answers.txt", '\n' + logClozeCardAnswer, encoding = 'utf8');
 
       startProgram();
     });
 };
 //------------------------------------------------------------------
+
+//VARIABLES FOR FLASHCARD FUNCTION (IN GLOBAL SCOPE)
 var questionIndex = 1
 var answerIndex = 1
 var flashAnswers
 var flashQuestions
+
 //RUN FLASHCARDS FUNCTION
 //------------------------------------------------------------------
+
 function flashCards () {
 
   fs.readFile("answers.txt", "utf8", function(error, data){
@@ -114,8 +117,9 @@ function flashCards () {
       return console.log(error);
     }
     flashAnswers = data.split('\n');
-    console.log("this is flashAnswers inside its own scope: " + flashAnswers[1]);
-    console.log("this is the length of the Answers array " + flashAnswers.length);
+    flashAnswers1 = data
+    // console.log(flashAnswers);
+    // console.log(flashAnswers1);
   });
 
   fs.readFile("questions.txt", "utf8", function(error, data) {
@@ -123,9 +127,8 @@ function flashCards () {
       return console.log(error);
       }
 
-      var flashQuestions = data.split('\n');
-        console.log("this is the length of the questions array " + flashQuestions.length);
-        console.log("this is " + flashAnswers[1] + " inside flashQuestions scope.")
+      flashQuestions = data.split('\n');
+
           inquirer.prompt([
             {
               name: "qSide",
@@ -133,15 +136,22 @@ function flashCards () {
               message: flashQuestions[questionIndex]
             }
           ]).then(function(answers) {
-            if (answers.qSide === flashAnswers[answerIndex]) {
-              console.log("it works!!!");
-              console.log(flashAnswers[answerIndex])
-            } else {
-            console.log("Your're Incorrect :(")
-            }
-          });
-      });
-
-      //------------------------------------------------------------------
-
+            if (questionIndex === (flashQuestions.length - 1)) {
+              console.log("There are no more flashcards!");
+              questionIndex = 1
+              answerIndex = 1
+              startProgram();
+              } else if (answers.qSide === flashAnswers[answerIndex]) {
+                console.log("Correct!!!");
+                answerIndex++
+                questionIndex++
+                flashCards();
+                  } else if (answers.qSide !== flashAnswers[answerIndex]) {
+                      console.log("Your're Incorrect :(");
+                      answerIndex++
+                      questionIndex++
+                      flashCards();
+                    }
+            });
+  });
 };
