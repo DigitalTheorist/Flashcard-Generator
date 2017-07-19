@@ -1,17 +1,18 @@
 
 var inquirer = require('inquirer');
 var fs = require('fs');
-var readline = require('linebyline');
+var lineReader = require('line-reader');
+
 var MakeCard = require("./BasicCard");
 var ClozeCard = require("./ClozeCard");
 
-var whichCard = process.argv[2]
-
 startProgram();
+
 //USER INSTRUCTIONS
 //------------------------------------------------------------------
-function startProgram(){
+//------------------------------------------------------------------
 
+function startProgram(){
   inquirer.prompt ([
     {
       type: "checkbox",
@@ -56,11 +57,14 @@ inquirer.prompt ([
 
       var basicCard = new MakeCard (answers.front, answers.back)
 
-      var logBasicCard =
-      "Front of card: " + answers.front +
-      "\nBack of card: " + answers.back;
-        console.log("Your Card has been created and added to the list.")
-      fs.appendFileSync("cards.txt","\n \n" + logBasicCard, encoding = 'utf8');
+      var logBasicCardQuestion = answers.front;
+      var logBasicCardAnswer = answers.back;
+
+      console.log("Your Card has been created and added to the list.")
+
+      fs.appendFileSync("questions.txt",logBasicCardQuestion + "\n", encoding = 'utf8');
+      fs.appendFileSync("answers.txt",logBasicCardAnswer + "\n", encoding = 'utf8');
+
       startProgram();
     });
 };
@@ -72,7 +76,7 @@ function createClozeCards () {
 inquirer.prompt ([
    {
      name: "front",
-     message: "What should the ClozeCard ask?"
+     message: "Write the full text of the Clozecard question."
    },
    {
      name: "cloze",
@@ -80,39 +84,64 @@ inquirer.prompt ([
    },
     ]).then(function(answers){
 
-      //Manipulates user input string to replace text with ...
       var str = answers.front;
       answers.front = str.replace(answers.cloze, "...");
 
       var clozeCard = new ClozeCard (answers.front, answers.cloze)
 
-      var logClozeCard =
-      "Front of card: " + answers.front +
-      "\nBack of card: " + answers.cloze;
+      var logClozeCardQuestion = answers.front;
+      var logClozeCardAnswer =  answers.cloze;
 
-      fs.appendFileSync("cards.txt","\n \n" + logClozeCard, encoding = 'utf8');
+      console.log("Your Card has been created and added to the list.")
+
+      fs.appendFileSync("questions.txt",logClozeCardQuestion, encoding = 'utf8');
+      fs.appendFileSync("answers.txt",logClozeCardAnswer, encoding = 'utf8');
+
       startProgram();
     });
 };
 //------------------------------------------------------------------
-
+var questionIndex = 1
+var answerIndex = 1
+var flashAnswers
+var flashQuestions
 //RUN FLASHCARDS FUNCTION
 //------------------------------------------------------------------
-function flashCards (){
-  console.log("this is the flashcard function")
+function flashCards () {
 
+  fs.readFile("answers.txt", "utf8", function(error, data){
+    if (error) {
+      return console.log(error);
+    }
+    flashAnswers = data.split('\n');
+    console.log("this is flashAnswers inside its own scope: " + flashAnswers[1]);
+    console.log("this is the length of the Answers array " + flashAnswers.length);
+  });
 
-    rl = readline('./cards.txt');
-    rl.on('line', function(line, lineCount, byteCount) {
-      console.log(byteCount);
-    })
-    .on('error', function(e) {
-      // something went wrong
-    });
+  fs.readFile("questions.txt", "utf8", function(error, data) {
+    if (error) {
+      return console.log(error);
+      }
 
-  // fs.readFile('cards.txt', 'utf8', function(err, data){
-  //   if (err) throw err;
-  //   console.log(data);
-  // })
+      var flashQuestions = data.split('\n');
+        console.log("this is the length of the questions array " + flashQuestions.length);
+        console.log("this is " + flashAnswers[1] + " inside flashQuestions scope.")
+          inquirer.prompt([
+            {
+              name: "qSide",
+              type: 'input',
+              message: flashQuestions[questionIndex]
+            }
+          ]).then(function(answers) {
+            if (answers.qSide === flashAnswers[answerIndex]) {
+              console.log("it works!!!");
+              console.log(flashAnswers[answerIndex])
+            } else {
+            console.log("Your're Incorrect :(")
+            }
+          });
+      });
+
+      //------------------------------------------------------------------
 
 };
