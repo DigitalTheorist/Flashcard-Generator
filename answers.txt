@@ -1,7 +1,5 @@
-
-bye
-world
-cat
-green
-down
-ricola
+recursive
+camp
+Maine
+database
+iPhone

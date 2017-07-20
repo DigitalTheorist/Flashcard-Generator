@@ -48,15 +48,15 @@ function createBasicCards() {
     }
   ]).then(function(answers) {
 
-    var basicCard = new MakeCard(answers.front, answers.back)
+    var basicCard = new MakeCard(answers.front, answers.back);
 
     var logBasicCardQuestion = answers.front;
     var logBasicCardAnswer = answers.back;
 
     console.log("Your Card has been created and added to the list.")
 
-    fs.appendFileSync("questions.txt", '\n' + logBasicCardQuestion, encoding = 'utf8');
-    fs.appendFileSync("answers.txt", '\n' + logBasicCardAnswer, encoding = 'utf8');
+    fs.appendFileSync("questions.txt", logBasicCardQuestion + '\n');
+    fs.appendFileSync("answers.txt", logBasicCardAnswer + '\n');
 
     startProgram();
   });
@@ -79,15 +79,15 @@ function createClozeCards() {
     var str = answers.front;
     answers.front = str.replace(answers.cloze, "...");
 
-    var clozeCard = new ClozeCard(answers.front, answers.cloze)
+    var clozeCard = new ClozeCard(answers.front, answers.cloze);
 
     var logClozeCardQuestion = answers.front;
     var logClozeCardAnswer = answers.cloze;
 
     console.log("Your Card has been created and added to the list.")
 
-    fs.appendFileSync("questions.txt", '\n' + logClozeCardQuestion, encoding = 'utf8');
-    fs.appendFileSync("answers.txt", '\n' + logClozeCardAnswer, encoding = 'utf8');
+    fs.appendFileSync("questions.txt", logClozeCardQuestion +'\n');
+    fs.appendFileSync("answers.txt", logClozeCardAnswer + '\n');
 
     startProgram();
   });
@@ -95,12 +95,12 @@ function createClozeCards() {
 //------------------------------------------------------------------
 
 // ASSIGN VARIABLES FOR FLASHCARD FUNCTION (IN GLOBAL SCOPE)
-var questionIndex = 1
-var answerIndex = 1
+var questionIndex = 0
+var answerIndex = 0
 var flashAnswers
 var flashQuestions
 
-// RUN FLASHCARDS FUNCTION
+// RUN FLASHCARDS FUNCTION (recursive)
 //------------------------------------------------------------------
 
 function flashCards() {
@@ -114,7 +114,7 @@ function flashCards() {
     flashAnswers = data.split('\n');
   });
 
-  //READFILE FOR QUESTIONS.TXT  - ASSIGN VAR flashQuestions
+  // READFILE FOR QUESTIONS.TXT  - ASSIGN VAR flashQuestions
 
   fs.readFile("questions.txt", "utf8", function(error, data) {
     if (error) {
@@ -122,7 +122,7 @@ function flashCards() {
     }
     flashQuestions = data.split('\n');
 
-    //INQUIRER TO RUN FLASHCARD QUIZ
+    // INQUIRER TO RUN FLASHCARD QUIZ
 
     inquirer.prompt([
       {
@@ -131,25 +131,28 @@ function flashCards() {
         message: flashQuestions[questionIndex]
       }
     ]).then(function(answers) {
-      if (questionIndex === (flashQuestions.length - 1)) { // Check to see if length of questions not exceeded
+      if (questionIndex === (flashQuestions.length - 2)) { // Check to see if length of questions not exceeded. This is the recursive function terminator.
         console.log("There are no more flashcards!");
-        questionIndex = 1 // Reset questionIndex
-        answerIndex = 1 // Reset answerIndex
+        questionIndex = 0 // Reset questionIndex
+        answerIndex = 0 // Reset answerIndex
         startProgram(); // Call startProgram
 
       } else if (answers.qSide === flashAnswers[answerIndex]) { // If not exceeded run Correct answer function
-        console.log("Correct!!!");
-        answerIndex++ // Increment answerIndex
-        questionIndex++ // Increment questionIndex
-        flashCards(); // Call flashCards
+          console.log("Correct!!!");
+          answerIndex++ // Increment answerIndex
+          questionIndex++ // Increment questionIndex
+          flashCards(); // Call flashCards
 
-      } else if (answers.qSide !== flashAnswers[answerIndex]) { // if Incorrect answer run function
-        console.log("Your're Incorrect :(");
-        answerIndex++ // Increment answerIndex
-        questionIndex++ // Increment questionIndex
-        flashCards(); // Call flashCards
+      } else if (answers.qSide !== flashAnswers[answerIndex]) { // if Incorrect answer, run incorrect answer function
+            console.log("Your're Incorrect :(");
+            answerIndex++ // Increment answerIndex
+            questionIndex++ // Increment questionIndex
+            flashCards(); // Call flashCards
       }
 
     });
   });
 };
+
+
+// test zone

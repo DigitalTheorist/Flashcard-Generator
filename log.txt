@@ -1,0 +1,5 @@
+[object Object]
+[object Object]
+[object Object]
+
+note * must use JSON stringify to read an object from txt file?
